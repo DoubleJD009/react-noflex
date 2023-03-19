@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/react-noflex/static/css/main.754ebb54.css",
+    "main.js": "/react-noflex/static/js/main.579314ea.js",
+    "index.html": "/react-noflex/index.html",
+    "main.754ebb54.css.map": "/react-noflex/static/css/main.754ebb54.css.map",
+    "main.579314ea.js.map": "/react-noflex/static/js/main.579314ea.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.754ebb54.css",
+    "static/js/main.579314ea.js"
+  ]
+}
