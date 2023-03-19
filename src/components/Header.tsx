@@ -1,5 +1,10 @@
 import styled from "styled-components";
-import { motion, useAnimation, useScroll } from "framer-motion";
+import {
+  motion,
+  useAnimation,
+  useMotionValueEvent,
+  useScroll,
+} from "framer-motion";
 import { Link, useRouteMatch } from "react-router-dom";
 import { useEffect, useState } from "react";
 // import { useRecoilState } from "recoil";
@@ -127,15 +132,14 @@ function Header() {
     }
     setSearchOpen((prev) => !prev);
   };
-  useEffect(() => {
-    scrollY.onChange(() => {
-      if (scrollY.get() > 80) {
-        navAnimation.start("scroll");
-      } else {
-        navAnimation.start("top");
-      }
-    });
-  }, [scrollY, navAnimation]);
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (latest > 80) {
+      navAnimation.start("scroll");
+    } else {
+      navAnimation.start("top");
+    }
+    // console.log(latest);
+  });
   return (
     <Nav variants={navVariants} animate={navAnimation} initial={"top"}>
       <Col>
