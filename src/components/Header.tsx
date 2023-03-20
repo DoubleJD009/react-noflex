@@ -5,7 +5,7 @@ import {
   useMotionValueEvent,
   useScroll,
 } from "framer-motion";
-import { Link, useRouteMatch, useHistory } from "react-router-dom";
+import { Link, useMatch, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 // import { useRecoilState } from "recoil";
@@ -123,8 +123,8 @@ interface IForm {
 
 function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
-  const homeMatch = useRouteMatch("/");
-  const tvMatch = useRouteMatch("/tv");
+  const homeMatch = useMatch("/");
+  const tvMatch = useMatch("/tv");
   const inputAnimation = useAnimation();
   const navAnimation = useAnimation();
   const { scrollY } = useScroll();
@@ -152,10 +152,10 @@ function Header() {
   });
 
   // Keyword 검색 기능 로직 - 시작
-  const history = useHistory();
+  const navigate = useNavigate();
   const { register, handleSubmit } = useForm<IForm>();
   const onValid = (data: IForm) => {
-    history.push(`/search?keyword=${data.keyword}`);
+    navigate(`/search?keyword=${data.keyword}`);
   };
   // Keyword 검색 기능 로직 - 끝
 
@@ -175,9 +175,7 @@ function Header() {
         </Logo>
         <Items>
           <Item>
-            <Link to="/">
-              Home {homeMatch?.isExact && <Circle layoutId="circle" />}
-            </Link>
+            <Link to="/">Home {homeMatch && <Circle layoutId="circle" />}</Link>
           </Item>
           <Item>
             <Link to="/tv">

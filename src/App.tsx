@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Home from "./routes/Home";
 import Search from "./routes/Search";
@@ -8,17 +8,18 @@ function App() {
   return (
     <Router basename={process.env.PUBLIC_URL}>
       <Header />
-      <Switch>
-        <Route path={"/tv"}>
-          <Tv />
+      <Routes>
+        <Route path="/" element={<Home />}>
+          <Route path="movies/:category/:movieId" element={<Home />}></Route>
         </Route>
-        <Route path={"/search"}>
-          <Search />
+        <Route path="/tv" element={<Tv />}>
+          <Route path="tvs/:category/:tvId" element={<Tv />} />
         </Route>
-        <Route path={["/", "/movies/:movieId"]}>
-          <Home />
+        <Route path="/search" element={<Search />}>
+          <Route path=":movieId" element={<Search />}></Route>
+          <Route path=":tvId" element={<Search />}></Route>
         </Route>
-      </Switch>
+      </Routes>
     </Router>
   );
 }

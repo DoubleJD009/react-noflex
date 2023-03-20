@@ -1,18 +1,16 @@
 import { AnimatePresence, motion, useScroll } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
-import { useHistory, useRouteMatch, useParams } from "react-router-dom";
+import { useNavigate, useMatch } from "react-router-dom";
 import styled from "styled-components";
 import {
-  IGetMoviesResult,
+  IGetBaseResult,
   getMovies,
   IGetMovieDetail,
   getMovieDetail,
-  ITvShows,
-  getTvShows,
-  ITvShowsDetail,
-  getTvShowsDetail,
   TYPES,
+  TYPES_TV,
+  getTvShows,
 } from "../api";
 import { makeImagePath, Ratings } from "../utils";
 
@@ -244,15 +242,26 @@ export const infoVariants = {
 
 export const offset = 6;
 
-function Slider({ type }: { type: TYPES }) {
-  const history = useHistory();
-  const bigMovieMatch = useRouteMatch<{ movieId: string }>("/movies/:movieId");
-  const { data, isLoading } = useQuery<IGetMoviesResult>(["movies", type], () =>
-    getMovies(type)
+export function Slider({
+  menu,
+  type,
+}: {
+  menu: string;
+  type: TYPES | TYPES_TV;
+}) {
+  const navigate = useNavigate();
+  const bigMovieMatch = useMatch(`/${menu}/${type}/:movieId`);
+  const { data, isLoading } = useQuery<IGetBaseResult | undefined>(
+    [menu, type],
+    () => {
+      if (menu === "movies") return getMovies(type as TYPES);
+      else if (menu === "tvs") return getTvShows(type as TYPES_TV);
+    }
   );
   const { scrollY } = useScroll();
   const [clickReverse, setClickReverse] = useState(false);
-  // 영화 슬라이더 관리 로직 - 시작
+
+  // 슬라이더 관리 로직 - 시작
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
   const increaseIndex = () => {
@@ -260,8 +269,8 @@ function Slider({ type }: { type: TYPES }) {
       if (leaving) return;
       // 이전 Animation 동작이 끝나기전까지는 Animation 동작을 막는 로직
       toggleLeaving();
-      const totalMovies = data.results.length - 1;
-      const maxIndex = Math.floor(totalMovies / offset) - 1;
+      const totalCount = data.results.length - 1;
+      const maxIndex = Math.floor(totalCount / offset) - 1;
       setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
     }
   };
@@ -270,27 +279,35 @@ function Slider({ type }: { type: TYPES }) {
       if (leaving) return;
       setClickReverse(true);
       toggleLeaving();
-      const totalMovies = data.results.length - 1;
-      const maxIndex = Math.floor(totalMovies / offset) - 1;
+      const totalCount = data.results.length - 1;
+      const maxIndex = Math.floor(totalCount / offset) - 1;
       setIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
     }
   };
   const toggleLeaving = () => setLeaving((prev) => !prev);
-  // 영화 슬라이더 관리 로직 - 끝
+  // 슬라이더 관리 로직 - 끝
 
-  // 영화 상세 정보 팝업
-  const onBoxClicked = (movieId: number) => {
-    history.push(`/movies/${movieId}`);
+  // 상세 정보 팝업
+  const onBoxClicked = ({
+    movieId,
+    clss,
+  }: {
+    movieId: number;
+    clss: string;
+  }) => {
+    navigate(`/movies/${clss}/${movieId}`);
   };
 
-  // 영화 상세 정보 팝업 후 Overlay 클릭 시 Home으로 이동
-  const onOverlayClick = () => history.push("/");
+  // 상세 정보 팝업 후 Overlay 클릭 시 Home으로 이동
+  const onOverlayClick = () => navigate("/");
 
-  // 영화 상세 정보 팝업 클릭 시 상세 정보를 팝업에 보이게 동작
+  // 상세 정보 팝업 클릭 시 상세 정보를 팝업에 보이게 동작
   const clickedMovie =
     bigMovieMatch?.params.movieId &&
-    data?.results.find((movie) => movie.id === +bigMovieMatch.params.movieId);
-
+    data?.results.find(
+      (movie) => String(movie.id) === bigMovieMatch.params.movieId
+    );
+  // console.log(clickedMovie);
   const { data: clickedMovieDetail, isLoading: isLoadingDetail } =
     useQuery<IGetMovieDetail>([bigMovieMatch?.params.movieId, "detail"], () =>
       getMovieDetail(bigMovieMatch?.params.movieId)
@@ -298,19 +315,13 @@ function Slider({ type }: { type: TYPES }) {
 
   return (
     <>
-      <SliderRow>
+      <SliderRow key={type}>
         <AnimatePresence
           initial={false}
           onExitComplete={toggleLeaving}
           custom={{ clickReverse }}
         >
-          <Category>
-            {type === TYPES.NOW_PLAYING
-              ? "now playing"
-              : type === TYPES.TOP_RATED
-              ? "top rated"
-              : type}
-          </Category>
+          <Category>{type.replaceAll("_", " ")}</Category>
           <Row
             key={type + index}
             variants={rowVariants}
@@ -324,10 +335,12 @@ function Slider({ type }: { type: TYPES }) {
               .slice(offset * index, offset * index + offset)
               .map((movie) => (
                 <Box
-                  layoutId={type + movie.id}
+                  layoutId={type + movie.id + ""}
                   key={type + movie.id}
                   variants={boxVariants}
-                  onClick={() => onBoxClicked(movie.id)}
+                  onClick={() => {
+                    onBoxClicked({ movieId: movie.id, clss: type });
+                  }}
                   initial="normal"
                   whileHover="hover"
                   transition={{
@@ -373,7 +386,7 @@ function Slider({ type }: { type: TYPES }) {
               exit={{ opacity: 0 }}
             ></Overlay>
             <BigMovie
-              layoutId={type + bigMovieMatch.params.movieId!!}
+              layoutId={type + bigMovieMatch.params.movieId + ""}
               scrollY={scrollY.get()}
             >
               {clickedMovie && (
@@ -426,5 +439,3 @@ function Slider({ type }: { type: TYPES }) {
     </>
   );
 }
-
-export default Slider;

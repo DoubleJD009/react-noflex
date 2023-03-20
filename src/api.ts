@@ -18,21 +18,22 @@ export enum TYPES_TV {
   "POPULAR" = "popular",
   "TOP_RATED" = "top_rated",
 }
-interface IMovie {
+interface IResult {
   id: number;
   backdrop_path: string;
   poster_path: string;
-  title: string;
+  title?: string;
+  name?: string;
   overview: string;
 }
   
-export interface IGetMoviesResult {
+export interface IGetBaseResult {
   dates: {
     maximum: string;
     minimum: string;
   };
   page: number;
-  results: IMovie[];
+  results: IResult[];
   total_pages: number;
   total_results: number;
 }
@@ -140,7 +141,7 @@ export interface ITvShowsDetail {
   vote_count: number;
 }
 
-export function getMovies(type: TYPES) {
+export function getMovies(type: TYPES): Promise<IGetBaseResult> {
   return fetch(`${BASE_PATH}/movie/${type}?${BASE_PARAM}`).then(
     (response) => response.json()
   );
@@ -155,7 +156,7 @@ export async function getMovieDetail(movieId: string | undefined) {
   ).json();
 }
 
-export async function getTvShows(type: TYPES_TV) {
+export async function getTvShows(type: TYPES_TV): Promise<IGetBaseResult> {
   return (
     await fetch(
       `${BASE_PATH}/tv/${type}?${BASE_PARAM}&page=1`

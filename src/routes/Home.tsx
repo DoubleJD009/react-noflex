@@ -1,11 +1,8 @@
-import { AnimatePresence, motion, useScroll } from "framer-motion";
 import { useQuery } from "react-query";
 import styled from "styled-components";
-import { getMovies, IGetMoviesResult, TYPES } from "../api";
+import { getMovies, IGetBaseResult, TYPES } from "../api";
 import { makeImagePath } from "../utils";
-import { useEffect, useState } from "react";
-import { useHistory, useRouteMatch } from "react-router-dom";
-import Slider from "../components/Slider";
+import { Slider } from "../components/Slider";
 
 const Wrapper = styled.div`
   background: black;
@@ -42,7 +39,7 @@ const Overview = styled.p`
 
 function Home() {
   //상영중인 영화 데이터 GET
-  const { data, isLoading } = useQuery<IGetMoviesResult>(
+  const { data, isLoading } = useQuery<IGetBaseResult>(
     ["movies", "nowPlaying"],
     () => getMovies(TYPES.NOW_PLAYING)
   );
@@ -59,10 +56,10 @@ function Home() {
             <Title>{data?.results[0].title}</Title>
             <Overview>{data?.results[0].overview}</Overview>
           </Banner>
-          <Slider type={TYPES.NOW_PLAYING} />
-          <Slider type={TYPES.POPULAR} />
-          <Slider type={TYPES.TOP_RATED} />
-          <Slider type={TYPES.UPCOMING} />
+          <Slider menu="movies" type={TYPES.NOW_PLAYING} />
+          <Slider menu="movies" type={TYPES.POPULAR} />
+          <Slider menu="movies" type={TYPES.TOP_RATED} />
+          <Slider menu="movies" type={TYPES.UPCOMING} />
         </>
       )}
     </Wrapper>
