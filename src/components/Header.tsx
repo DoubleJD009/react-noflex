@@ -153,7 +153,11 @@ function Header() {
 
   // Keyword 검색 기능 로직 - 시작
   const navigate = useNavigate();
-  const { register, handleSubmit } = useForm<IForm>();
+  const { register, handleSubmit } = useForm<IForm>({
+    defaultValues: {
+      keyword: "",
+    },
+  });
   const onValid = (data: IForm) => {
     navigate(`/search?keyword=${data.keyword}`);
   };

@@ -1,4 +1,5 @@
-import { useLocation } from "react-router";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router";
 import styled from "styled-components";
 import { TYPES, TYPES_TV } from "../api";
 import { Slider } from "../components/Slider";
