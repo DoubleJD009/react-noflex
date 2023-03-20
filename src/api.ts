@@ -71,7 +71,7 @@ export interface IGetMovieDetail {
       name: string;
     }
   ];
-  release_date: string;
+  release_date?: string;
   revenue: number;
   runtime: number;
   status: string;
@@ -139,6 +139,7 @@ export interface ITvShowsDetail {
 
   vote_average: number;
   vote_count: number;
+  release_date?: string;
 }
 
 export function getMovies(type: TYPES): Promise<IGetBaseResult> {

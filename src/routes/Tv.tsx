@@ -39,9 +39,8 @@ const Overview = styled.p`
 
 function Tv() {
   //상영중인 Tv 데이터 GET
-  const { data, isLoading } = useQuery<IGetBaseResult>(
-    ["tvs", "airingToday"],
-    () => getTvShows(TYPES_TV.AIRING_TODAY)
+  const { data, isLoading } = useQuery<IGetBaseResult>(["tv", "popular"], () =>
+    getTvShows(TYPES_TV.POPULAR)
   );
   console.log(data);
   return (
@@ -56,10 +55,10 @@ function Tv() {
             <Title>{data?.results[0].name}</Title>
             <Overview>{data?.results[0].overview}</Overview>
           </Banner>
-          <Slider menu="tvs" type={TYPES_TV.ON_THE_AIR} />
-          <Slider menu="tvs" type={TYPES_TV.TOP_RATED} />
-          <Slider menu="tvs" type={TYPES_TV.POPULAR} />
-          <Slider menu="tvs" type={TYPES_TV.AIRING_TODAY} />
+          <Slider menu="tv" type={TYPES_TV.ON_THE_AIR} />
+          <Slider menu="tv" type={TYPES_TV.TOP_RATED} />
+          <Slider menu="tv" type={TYPES_TV.POPULAR} />
+          <Slider menu="tv" type={TYPES_TV.AIRING_TODAY} />
         </>
       )}
     </Wrapper>

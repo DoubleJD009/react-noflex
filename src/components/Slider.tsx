@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useScroll } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "react-query";
 import { useNavigate, useMatch } from "react-router-dom";
 import styled from "styled-components";
@@ -11,6 +11,8 @@ import {
   TYPES,
   TYPES_TV,
   getTvShows,
+  ITvShowsDetail,
+  getTvShowsDetail,
 } from "../api";
 import { makeImagePath, Ratings } from "../utils";
 
@@ -250,12 +252,12 @@ export function Slider({
   type: TYPES | TYPES_TV;
 }) {
   const navigate = useNavigate();
-  const bigMovieMatch = useMatch(`/${menu}/${type}/:movieId`);
+  const bigMovieMatch = useMatch(`/${menu}/${type}/:dataId`);
   const { data, isLoading } = useQuery<IGetBaseResult | undefined>(
     [menu, type],
     () => {
       if (menu === "movies") return getMovies(type as TYPES);
-      else if (menu === "tvs") return getTvShows(type as TYPES_TV);
+      else if (menu === "tv") return getTvShows(type as TYPES_TV);
     }
   );
   const { scrollY } = useScroll();
@@ -289,29 +291,35 @@ export function Slider({
 
   // 상세 정보 팝업
   const onBoxClicked = ({
-    movieId,
+    menu,
+    dataId,
     clss,
   }: {
-    movieId: number;
+    menu: string;
+    dataId: number;
     clss: string;
   }) => {
-    navigate(`/movies/${clss}/${movieId}`);
+    navigate(`/${menu}/${clss}/${dataId}`);
   };
 
   // 상세 정보 팝업 후 Overlay 클릭 시 Home으로 이동
-  const onOverlayClick = () => navigate("/");
+  const basePath = menu === "movies" ? "/" : "./";
+  const onOverlayClick = () => navigate(basePath);
 
   // 상세 정보 팝업 클릭 시 상세 정보를 팝업에 보이게 동작
-  const clickedMovie =
-    bigMovieMatch?.params.movieId &&
+  const clickedBox =
+    bigMovieMatch?.params.dataId &&
     data?.results.find(
-      (movie) => String(movie.id) === bigMovieMatch.params.movieId
+      (movie) => String(movie.id) === bigMovieMatch.params.dataId
     );
-  // console.log(clickedMovie);
-  const { data: clickedMovieDetail, isLoading: isLoadingDetail } =
-    useQuery<IGetMovieDetail>([bigMovieMatch?.params.movieId, "detail"], () =>
-      getMovieDetail(bigMovieMatch?.params.movieId)
-    );
+  // console.log(clickedBox);
+  const { data: clickedBoxDetail, isLoading: isLoadingDetail } = useQuery<
+    IGetMovieDetail | ITvShowsDetail | undefined
+  >([bigMovieMatch?.params.dataId, "detail"], () => {
+    if (menu === "movies") return getMovieDetail(bigMovieMatch?.params.dataId);
+    else if (menu === "tv")
+      return getTvShowsDetail(bigMovieMatch?.params.dataId);
+  });
 
   return (
     <>
@@ -333,13 +341,13 @@ export function Slider({
           >
             {data?.results
               .slice(offset * index, offset * index + offset)
-              .map((movie) => (
+              .map((data) => (
                 <Box
-                  layoutId={type + movie.id + ""}
-                  key={type + movie.id}
+                  layoutId={menu + type + data.id + ""}
+                  key={menu + type + data.id}
                   variants={boxVariants}
                   onClick={() => {
-                    onBoxClicked({ movieId: movie.id, clss: type });
+                    onBoxClicked({ menu: menu, clss: type, dataId: data.id });
                   }}
                   initial="normal"
                   whileHover="hover"
@@ -347,12 +355,12 @@ export function Slider({
                     type: "tween",
                   }}
                   bg_photo={makeImagePath(
-                    movie.backdrop_path || movie.poster_path,
+                    data.backdrop_path || data.poster_path,
                     "w500"
                   )}
                 >
                   <Info variants={infoVariants}>
-                    <h4>{movie.title}</h4>
+                    <h4>{data.title}</h4>
                   </Info>
                 </Box>
               ))}
@@ -386,48 +394,48 @@ export function Slider({
               exit={{ opacity: 0 }}
             ></Overlay>
             <BigMovie
-              layoutId={type + bigMovieMatch.params.movieId + ""}
+              layoutId={menu + type + bigMovieMatch.params.dataId + ""}
               scrollY={scrollY.get()}
             >
-              {clickedMovie && (
+              {clickedBox && (
                 <>
                   <BigCover
                     bg_photo={makeImagePath(
-                      clickedMovie.backdrop_path || clickedMovie.poster_path,
+                      clickedBox.backdrop_path || clickedBox.poster_path,
                       "w500"
                     )}
                   >
-                    <BigTitle>{clickedMovie.title}</BigTitle>
+                    <BigTitle>{clickedBox.title}</BigTitle>
                   </BigCover>
                   <BigInfo>
                     <div>
                       {new Date(
-                        clickedMovieDetail?.release_date as string
+                        clickedBoxDetail?.release_date as string
                       ).getFullYear()}
                     </div>
-                    <Adult adult={clickedMovieDetail?.adult}>
-                      {clickedMovieDetail?.adult ? 19 : "All"}
+                    <Adult adult={clickedBoxDetail?.adult}>
+                      {clickedBoxDetail?.adult ? 19 : "All"}
                     </Adult>
                     {type === TYPES.UPCOMING ||
-                    (clickedMovieDetail?.vote_average as number) === 0.0 ? (
+                    (clickedBoxDetail?.vote_average as number) === 0.0 ? (
                       <div>Not Rated</div>
                     ) : (
                       <Ratings
-                        rating={clickedMovieDetail?.vote_average as number}
+                        rating={clickedBoxDetail?.vote_average as number}
                       />
                     )}
                   </BigInfo>
-                  <BigOverview>{clickedMovie.overview}</BigOverview>
+                  <BigOverview>{clickedBox.overview}</BigOverview>
                   <BigSubInfo>
                     <div>
                       <span>Genres: </span>
-                      {clickedMovieDetail?.genres.map((data) => (
+                      {clickedBoxDetail?.genres.map((data) => (
                         <span> {data.name} </span>
                       ))}
                     </div>
                     <div>
                       <span>Language: </span>
-                      {clickedMovieDetail?.original_language.toUpperCase()}
+                      {clickedBoxDetail?.original_language.toUpperCase()}
                     </div>
                   </BigSubInfo>
                 </>
