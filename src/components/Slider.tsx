@@ -13,6 +13,8 @@ import {
   getTvShows,
   ITvShowsDetail,
   getTvShowsDetail,
+  getSearchResult,
+  IGetSearchResult,
 } from "../api";
 import { makeImagePath, Ratings } from "../utils";
 
@@ -247,9 +249,11 @@ export const offset = 6;
 export function Slider({
   menu,
   type,
+  keyword,
 }: {
   menu: string;
-  type: TYPES | TYPES_TV;
+  type: TYPES | TYPES_TV | string;
+  keyword?: string;
 }) {
   const navigate = useNavigate();
   const bigMovieMatch = useMatch(`/${menu}/${type}/:dataId`);
@@ -258,8 +262,12 @@ export function Slider({
     () => {
       if (menu === "movies") return getMovies(type as TYPES);
       else if (menu === "tv") return getTvShows(type as TYPES_TV);
+      else if (menu === "search") {
+        return getSearchResult(String(keyword), type as string);
+      }
     }
   );
+
   const { scrollY } = useScroll();
   const [clickReverse, setClickReverse] = useState(false);
 
@@ -310,14 +318,15 @@ export function Slider({
   const clickedBox =
     bigMovieMatch?.params.dataId &&
     data?.results.find(
-      (movie) => String(movie.id) === bigMovieMatch.params.dataId
+      (data) => String(data.id) === bigMovieMatch.params.dataId
     );
   // console.log(clickedBox);
   const { data: clickedBoxDetail, isLoading: isLoadingDetail } = useQuery<
     IGetMovieDetail | ITvShowsDetail | undefined
   >([bigMovieMatch?.params.dataId, "detail"], () => {
-    if (menu === "movies") return getMovieDetail(bigMovieMatch?.params.dataId);
-    else if (menu === "tv")
+    if (menu === "movies" || type === "movie")
+      return getMovieDetail(bigMovieMatch?.params.dataId);
+    else if (menu === "tv" || type === "tv")
       return getTvShowsDetail(bigMovieMatch?.params.dataId);
   });
 
@@ -405,17 +414,15 @@ export function Slider({
                       "w500"
                     )}
                   >
-                    <BigTitle>{clickedBox.title}</BigTitle>
+                    <BigTitle>{clickedBox.title || clickedBox.name}</BigTitle>
                   </BigCover>
                   <BigInfo>
                     <div>
                       {new Date(
-                        clickedBoxDetail?.release_date as string
+                        (clickedBoxDetail?.release_date as string) ||
+                          (clickedBoxDetail?.first_air_date as string)
                       ).getFullYear()}
                     </div>
-                    <Adult adult={clickedBoxDetail?.adult}>
-                      {clickedBoxDetail?.adult ? 19 : "All"}
-                    </Adult>
                     {type === TYPES.UPCOMING ||
                     (clickedBoxDetail?.vote_average as number) === 0.0 ? (
                       <div>Not Rated</div>

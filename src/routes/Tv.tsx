@@ -42,7 +42,6 @@ function Tv() {
   const { data, isLoading } = useQuery<IResult>(["tv", "latest"], () =>
     getTvShowsLatest(TYPES_TV.LATEST)
   );
-  console.log(data);
   return (
     <Wrapper>
       {isLoading ? (

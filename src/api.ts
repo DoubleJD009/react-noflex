@@ -10,6 +10,7 @@ export enum TYPES {
   "POPULAR" = "popular",
   "TOP_RATED" = "top_rated",
   "UPCOMING" = "upcoming",
+  "SEARCH" ="movie"
 }
 
 export enum TYPES_TV {
@@ -17,6 +18,7 @@ export enum TYPES_TV {
   "AIRING_TODAY" = "airing_today",
   "POPULAR" = "popular",
   "TOP_RATED" = "top_rated",
+  "SEARCH" ="tv"
 }
 export interface IResult {
   id: number;
@@ -80,6 +82,8 @@ export interface IGetMovieDetail {
   video: boolean;
   vote_average: number;
   vote_count: number;
+  first_air_date?: string;
+  last_air_date?: string;
 }
 
 interface ITvShow {
@@ -201,7 +205,7 @@ export async function getTvShowsDetail(tvId: string | undefined) {
   ).json();
 }
 
-export async function getSearchResult(keyword: string, type:string): Promise<IGetSearchResult> {
+export async function getSearchResult(keyword: string, type:string): Promise<IGetBaseResult> {
   return (
     await fetch(
       `${BASE_PATH}/search/${type}?${BASE_PARAM}&query=${keyword}`
