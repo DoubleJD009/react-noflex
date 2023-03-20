@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 import styled from "styled-components";
-import { getTvShows, IGetBaseResult, TYPES_TV } from "../api";
+import { getTvShows, getTvShowsLatest, IResult, TYPES_TV } from "../api";
 import { makeImagePath } from "../utils";
 import { Slider } from "../components/Slider";
 
@@ -39,8 +39,8 @@ const Overview = styled.p`
 
 function Tv() {
   //상영중인 Tv 데이터 GET
-  const { data, isLoading } = useQuery<IGetBaseResult>(["tv", "popular"], () =>
-    getTvShows(TYPES_TV.POPULAR)
+  const { data, isLoading } = useQuery<IResult>(["tv", "latest"], () =>
+    getTvShowsLatest(TYPES_TV.LATEST)
   );
   console.log(data);
   return (
@@ -49,13 +49,10 @@ function Tv() {
         <Loader>Loading...</Loader>
       ) : (
         <>
-          <Banner
-            bg_photo={makeImagePath(data?.results[0].backdrop_path || "")}
-          >
-            <Title>{data?.results[0].name}</Title>
-            <Overview>{data?.results[0].overview}</Overview>
+          <Banner bg_photo={makeImagePath(data?.backdrop_path || "")}>
+            <Title>{data?.name}</Title>
+            <Overview>{data?.overview}</Overview>
           </Banner>
-          <Slider menu="tv" type={TYPES_TV.ON_THE_AIR} />
           <Slider menu="tv" type={TYPES_TV.TOP_RATED} />
           <Slider menu="tv" type={TYPES_TV.POPULAR} />
           <Slider menu="tv" type={TYPES_TV.AIRING_TODAY} />

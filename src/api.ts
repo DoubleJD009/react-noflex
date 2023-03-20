@@ -6,19 +6,19 @@ const BASE_PATH = "https://api.themoviedb.org/3";
 const BASE_PARAM = `api_key=${API_KEY}&language=${LANGUAGE}&region=${REGION}`;
 
 export enum TYPES {
-  "NOW_PLAYING" = "now_playing",
+  "LATEST" = "latest",
   "POPULAR" = "popular",
   "TOP_RATED" = "top_rated",
   "UPCOMING" = "upcoming",
 }
 
 export enum TYPES_TV {
-  "ON_THE_AIR" = "on_the_air",
+  "LATEST" = "latest",
   "AIRING_TODAY" = "airing_today",
   "POPULAR" = "popular",
   "TOP_RATED" = "top_rated",
 }
-interface IResult {
+export interface IResult {
   id: number;
   backdrop_path: string;
   poster_path: string;
@@ -142,6 +142,28 @@ export interface ITvShowsDetail {
   release_date?: string;
 }
 
+export interface IGetSearchResult {
+  page: number;
+  results: ISearch[]; 
+  total_pages: number;
+  total_results: number;
+}
+interface ISearch {
+  id: number;
+  overview: string;
+  title?: string;
+  name?: string;
+  poster_path?: string;
+  backdrop_path?: string;
+  media_type: string;
+}
+
+export function getMoviesLatest(type: TYPES): Promise<IResult> {
+  return fetch(`${BASE_PATH}/movie/${type}?${BASE_PARAM}`).then(
+    (response) => response.json()
+  );
+}
+
 export function getMovies(type: TYPES): Promise<IGetBaseResult> {
   return fetch(`${BASE_PATH}/movie/${type}?${BASE_PARAM}`).then(
     (response) => response.json()
@@ -153,6 +175,14 @@ export async function getMovieDetail(movieId: string | undefined) {
   return (
     await fetch(
       `${BASE_PATH}/movie/${movieId}?${BASE_PARAM}`
+    )
+  ).json();
+}
+
+export async function getTvShowsLatest(type: TYPES_TV): Promise<IResult> {
+  return (
+    await fetch(
+      `${BASE_PATH}/tv/${type}?${BASE_PARAM}`
     )
   ).json();
 }
@@ -171,18 +201,10 @@ export async function getTvShowsDetail(tvId: string | undefined) {
   ).json();
 }
 
-export async function getSearchResult({
-  keyword,
-  category,
-  page,
-}: {
-  keyword: string | null;
-  category: string;
-  page: number;
-}) {
+export async function getSearchResult(keyword: string, type:string): Promise<IGetSearchResult> {
   return (
     await fetch(
-      `${BASE_PATH}/search/${category}?${BASE_PARAM}&query=${keyword}&page=${page}`
+      `${BASE_PATH}/search/${type}?${BASE_PARAM}&query=${keyword}`
     )
   ).json();
 }

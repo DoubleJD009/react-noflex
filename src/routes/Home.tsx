@@ -1,6 +1,12 @@
 import { useQuery } from "react-query";
 import styled from "styled-components";
-import { getMovies, IGetBaseResult, TYPES } from "../api";
+import {
+  getMovies,
+  getMoviesLatest,
+  IGetBaseResult,
+  IResult,
+  TYPES,
+} from "../api";
 import { makeImagePath } from "../utils";
 import { Slider } from "../components/Slider";
 
@@ -39,24 +45,20 @@ const Overview = styled.p`
 
 function Home() {
   //상영중인 영화 데이터 GET
-  const { data, isLoading } = useQuery<IGetBaseResult>(
-    ["movies", "nowPlaying"],
-    () => getMovies(TYPES.NOW_PLAYING)
+  const { data, isLoading } = useQuery<IResult>(["movies", "latest"], () =>
+    getMoviesLatest(TYPES.LATEST)
   );
-
   return (
     <Wrapper>
       {isLoading ? (
         <Loader>Loading...</Loader>
       ) : (
         <>
-          <Banner
-            bg_photo={makeImagePath(data?.results[0].backdrop_path || "")}
-          >
-            <Title>{data?.results[0].title}</Title>
-            <Overview>{data?.results[0].overview}</Overview>
+          <Banner bg_photo={makeImagePath(data?.backdrop_path || "")}>
+            <Title>{data?.title}</Title>
+            <Overview>{data?.overview}</Overview>
           </Banner>
-          <Slider menu="movies" type={TYPES.NOW_PLAYING} />
+          {/* <Slider menu="movies" type={TYPES.LATEST} /> */}
           <Slider menu="movies" type={TYPES.POPULAR} />
           <Slider menu="movies" type={TYPES.TOP_RATED} />
           <Slider menu="movies" type={TYPES.UPCOMING} />
